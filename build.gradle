@@ -53,6 +53,10 @@ dependencies {
 	testRuntime("org.junit.jupiter:junit-jupiter-engine")
 }
 
+junitPlatform {
+	details 'tree'
+}
+
 dependencyManagement {
 	imports {
 		mavenBom("org.springframework.boot:spring-boot-dependencies:$springBootVersion")

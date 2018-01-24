@@ -17,6 +17,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 //@WebFluxTest
+/**
+ * junitPlatformTest runs test classes matching filenames by pattern: ^.*Tests?$
+ */
 public class LearningappApplicationTests {
 
 	@Autowired
