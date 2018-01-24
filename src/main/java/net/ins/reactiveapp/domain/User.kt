@@ -1,4 +1,4 @@
-package com.epam.webflux.learningapp.domain
+package net.ins.reactiveapp.domain
 
 //import org.springframework.data.annotation.Id
 //import org.springframework.data.mongodb.core.mapping.Document

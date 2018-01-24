@@ -1,6 +1,6 @@
-package com.epam.webflux.learningapp.routes
+package net.ins.reactiveapp.routes
 
-import com.epam.webflux.learningapp.handlers.UsersHandler
+import net.ins.reactiveapp.handlers.UsersHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType.APPLICATION_JSON

@@ -1,6 +1,6 @@
-package com.epam.webflux.learningapp;
+package net.ins.reactiveapp;
 
-import com.epam.webflux.learningapp.domain.User;
+import net.ins.reactiveapp.domain.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;

@@ -1,6 +1,6 @@
-package com.epam.webflux.learningapp.handlers
+package net.ins.reactiveapp.handlers
 
-import com.epam.webflux.learningapp.domain.User
+import net.ins.reactiveapp.domain.User
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters.fromObject

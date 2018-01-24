@@ -1,4 +1,4 @@
-package com.epam.webflux.learningapp;
+package net.ins.reactiveapp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
