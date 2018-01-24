@@ -6,7 +6,10 @@ import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters.fromObject
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.bodyToServerSentEvents
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.time.Duration
 import java.util.Collections.emptyList
 
 /**
@@ -31,4 +34,11 @@ class UsersHandler {
             }
 
     fun getAll(req: ServerRequest) = ServerResponse.ok().body(fromObject(users))
+
+    fun streamAll(req: ServerRequest) = ServerResponse.ok()
+            .contentType(MediaType.APPLICATION_STREAM_JSON)
+            .bodyToServerSentEvents(Flux.interval(Duration.ofSeconds(1))
+                    .zipWith(Flux.fromStream(users.stream()))
+                    .map { it.t2 }
+            )
 }

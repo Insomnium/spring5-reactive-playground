@@ -21,6 +21,7 @@ open class LearningRouter(private val handler: UsersHandler) {
         (accept(APPLICATION_JSON) and "/api").nest {
             "/users".nest {
                 GET("/", handler::getAll)
+                GET("/stream", handler::streamAll)
                 GET("/{id}", handler::findById)
             }
         }
