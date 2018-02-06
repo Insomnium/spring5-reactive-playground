@@ -1,5 +1,7 @@
+test.mongo.port: 27027
+
 spring.data.mongodb:
-  uri: mongodb://localhost:27017
+  uri: mongodb://localhost:${test.mongo.port}
   database: users
 
 logging.level.org.springframework.data.mongodb.core.MongoTemplate: DEBUG

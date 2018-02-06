@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.server.router
 
 /**
  *
- *  @author Igor_Petrov@epam.com
+ *  @author Ins137@gmail.com
  *      Created at 1/22/2018
  */
 @Configuration

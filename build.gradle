@@ -1,9 +1,8 @@
 buildscript {
 	ext {
-		springBootVersion = '2.0.0.M7'
+		springBootVersion = '2.0.0.BUILD-SNAPSHOT'
 		junitPlatformPluginVersion = '1.0.3'
-		kotlin_version = '1.2.20'
-		depManagementPluginVersion = '1.0.4.RELEASE'
+		ktVersion = '1.2.20'
 	}
 	repositories {
 		mavenCentral()
@@ -11,10 +10,11 @@ buildscript {
 		maven { url "https://plugins.gradle.org/m2/" }
 		maven { url "https://repo.spring.io/snapshot" }
 		maven { url "https://repo.spring.io/milestone" }
+		maven { url "https://repo.spring.io/libs-snapshot" }
 	}
 	dependencies {
-		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-		classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$ktVersion"
+		classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
 		classpath "org.junit.platform:junit-platform-gradle-plugin:$junitPlatformPluginVersion"
 	}
 }
@@ -26,7 +26,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'org.junit.platform.gradle.plugin'
 
-group = 'com.epam.webflux'
+group = 'net.ins.reactiveapp'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
 
@@ -38,20 +38,24 @@ repositories {
 }
 
 dependencies {
-	compile('org.springframework.boot:spring-boot-starter-actuator')
-//	compile('org.springframework.boot:spring-boot-starter-data-mongodb')
-	compile('org.springframework.boot:spring-boot-starter-webflux')
-	compile('com.fasterxml.jackson.module:jackson-module-kotlin')
-	compileOnly('org.projectlombok:lombok')
+	compile 'org.springframework.boot:spring-boot-starter-actuator'
+	compile 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
+	compile 'org.springframework.boot:spring-boot-starter-webflux'
+	compile 'com.fasterxml.jackson.module:jackson-module-kotlin'
+	compileOnly 'org.projectlombok:lombok'
 	testCompile('org.springframework.boot:spring-boot-starter-test') {
 		exclude module: "junit"
 	}
-	testCompile('io.projectreactor:reactor-test')
-	compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-	compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-	testCompile("org.junit.jupiter:junit-jupiter-api")
-	testRuntime("org.junit.jupiter:junit-jupiter-engine")
+	testCompile 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
+	testCompile 'io.projectreactor:reactor-test'
+	testCompile 'org.projectlombok:lombok'
+	compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$ktVersion"
+	compile "org.jetbrains.kotlin:kotlin-reflect:$ktVersion"
+	testCompile "org.junit.jupiter:junit-jupiter-api"
+	testRuntime "org.junit.jupiter:junit-jupiter-engine"
 }
+
+//[test, junitPlatformTest]*.dependsOn clean
 
 junitPlatform {
 	details 'tree'
