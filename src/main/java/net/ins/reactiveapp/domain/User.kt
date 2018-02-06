@@ -1,11 +1,11 @@
 package net.ins.reactiveapp.domain
 
-//import org.springframework.data.annotation.Id
-//import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.mapping.Document
 
-//@Document(collection = "users")
+@Document(collection = "users")
 data class User(
-//        @Id
+        @Id
         val id: String?,
         val userId: Long,
         val firstName: String,

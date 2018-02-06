@@ -1,18 +1,30 @@
 package net.ins.reactiveapp;
 
+import com.mongodb.MongoClient;
+import de.flapdoodle.embed.mongo.MongodExecutable;
+import de.flapdoodle.embed.mongo.MongodStarter;
+import de.flapdoodle.embed.mongo.config.IMongodConfig;
+import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
+import de.flapdoodle.embed.mongo.config.Net;
+import de.flapdoodle.embed.mongo.distribution.Version;
+import de.flapdoodle.embed.process.runtime.Network;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import net.ins.reactiveapp.domain.User;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import net.ins.reactiveapp.repository.ReactiveUserRepository;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
+
+import java.util.Arrays;
 
 import static java.util.Collections.emptyList;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -24,17 +36,64 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 /**
  * junitPlatformTest runs test classes matching filenames by pattern: ^.*Tests?$
  */
+@Slf4j
 public class LearningappApplicationTests {
+
+	private static final String LOCALHOST = "localhost";
+
+	private final User[] testUsers = new User[]{
+			new User("0", 0L, "Ivan", "Ivanov", "IvanInvanov@corpmail.com", emptyList()),
+			new User("1", 1L, "Petr", "Petrov", "PetrPetrov@corpmail.com", emptyList()),
+			new User("2", 2L, "John", "Doe", "JohnDoe@corpmail.com", emptyList())
+	};
+
+	private MongodExecutable mongodExecutable;
+
+	private MongoClient mongoClient;
+
+	private WebTestClient webTestClient;
 
 	@Autowired
 	private ApplicationContext applicationContext;
 
-	private WebTestClient webTestClient;
+	@Autowired
+	private ReactiveUserRepository userRepository;
+
+	@Value("${test.mongo.port}")
+	private int testMongoPort;
 
 	@BeforeAll
+	@SneakyThrows
 	void init() {
 		webTestClient = WebTestClient.bindToApplicationContext(applicationContext)
 				.build();
+
+		IMongodConfig mongodConfig = new MongodConfigBuilder().version(Version.Main.PRODUCTION)
+				.net(new Net(LOCALHOST, testMongoPort, Network.localhostIsIPv6()))
+				.build();
+
+		MongodStarter mongodStarter = MongodStarter.getDefaultInstance();
+		mongodExecutable = mongodStarter.prepare(mongodConfig);
+		mongodExecutable.start();
+		mongoClient = new MongoClient(LOCALHOST, testMongoPort);
+	}
+
+	@AfterAll
+	void cleanup() {
+		if (mongodExecutable != null) {
+			mongodExecutable.stop();
+		}
+	}
+
+	@AfterEach
+	void cleanupTest() {
+		userRepository.deleteAll()
+				.subscribe();
+	}
+
+	private void prepareMongoData() {
+		userRepository.saveAll(Flux.fromArray(testUsers))
+				.subscribe();
 	}
 
 	@Test
@@ -47,31 +106,19 @@ public class LearningappApplicationTests {
 	@Test
 	@DisplayName("Should successfully return full users collection")
 	public void shouldReturnWholeUsersList() {
-		webTestClient.get()
+		prepareMongoData();
+		WebTestClient.ListBodySpec<User> userListBodySpec = webTestClient.get()
 				.uri("/api/users")
 				.accept(APPLICATION_JSON)
 				.exchange()
-				.expectBody()
-				.jsonPath("$.[0].id").isEqualTo("0")
-				.jsonPath("$.[0].userId").isEqualTo("0")
-				.jsonPath("$.[0].firstName").isEqualTo("Ivan")
-				.jsonPath("$.[0].lastName").isEqualTo("Ivanov")
-				.jsonPath("$.[0].email").isEqualTo("IvanInvanov@corpmail.com")
-				.jsonPath("$.[1].id").isEqualTo("1")
-				.jsonPath("$.[1].userId").isEqualTo("1")
-				.jsonPath("$.[1].firstName").isEqualTo("Petr")
-				.jsonPath("$.[1].lastName").isEqualTo("Petrov")
-				.jsonPath("$.[1].email").isEqualTo("PetrPetrov@corpmail.com")
-				.jsonPath("$.[2].id").isEqualTo("2")
-				.jsonPath("$.[2].userId").isEqualTo("2")
-				.jsonPath("$.[2].firstName").isEqualTo("John")
-				.jsonPath("$.[2].lastName").isEqualTo("Doe")
-				.jsonPath("$.[2].email").isEqualTo("JohnDoe@corpmail.com");
+				.expectBodyList(User.class)
+				.isEqualTo(Arrays.asList(testUsers));
 	}
 
 	@Test
 	@DisplayName("Should successfully stream users as frames")
 	public void shouldReturnUsersStream() {
+		prepareMongoData();
 		FluxExchangeResult<User> response = webTestClient.get()
 				.uri("/api/users/stream")
 				.exchange()
@@ -79,9 +126,9 @@ public class LearningappApplicationTests {
 				.returnResult(User.class);
 
 		StepVerifier.create(response.getResponseBody())
-				.expectNext(new User("0", 0L, "Ivan", "Ivanov", "IvanInvanov@corpmail.com", emptyList()))
-				.expectNext(new User("1", 1L, "Petr", "Petrov", "PetrPetrov@corpmail.com", emptyList()))
-				.expectNext(new User("2", 2L, "John", "Doe", "JohnDoe@corpmail.com", emptyList()))
+				.expectNext(testUsers[0])
+				.expectNext(testUsers[1])
+				.expectNext(testUsers[2])
 				.expectComplete()
 				.verify();
 	}
